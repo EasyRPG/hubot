@@ -1,0 +1,22 @@
+{
+  "name": "easyrpg_bot",
+  "version": "0.0.1",
+  "author": "take_cheeze",
+  "description": "easyrpg bot",
+  "license": "MIT",
+
+  "dependencies": {
+    "underscore": "*",
+    "handlebars": "*",
+    "hubot": "*",
+    "request": "*",
+    "redis": "*",
+    "feedparser": "*",
+    "hubot-irc": "*"
+  },
+
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.2.x"
+  }
+}
