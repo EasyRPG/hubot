@@ -10,7 +10,7 @@ hubot_files = [
   "youtube",
 ]
 
-hubot_script_files = [ "redis-brain", "octospy", ]
+hubot_script_files = [ "octospy", ]
 
 SCRIPT_PATH = __dirname + "/scripts"
 
