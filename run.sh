@@ -20,5 +20,5 @@ export FEED_CHECK_INTERVAL=60
 
 # npm update
 
-coffee ./update.coffee
-hubot -a irc
+./node_modules/coffee-script/bin/coffee ./update.coffee
+./node_modules/hubot/bin/hubot -a irc
