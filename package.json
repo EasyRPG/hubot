@@ -15,6 +15,7 @@
     "feedparser": "*",
     "hubot-irc": "*",
     "underscore": "*",
+    "handlebars": "*",
     "coffee-script": "*"
   },
 
