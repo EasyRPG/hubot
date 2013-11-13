@@ -11,6 +11,7 @@
 
   "dependencies": {
     "hubot": "*",
+    "hubot-scripts": "*",
     "feedparser": "*",
     "hubot-irc": "*",
     "coffee-script": "*"
