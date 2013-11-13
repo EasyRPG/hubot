@@ -1,1 +1,1 @@
-web: bash -e run.sh
+web: ./node_modules/hubot/bin/hubot -a irc
