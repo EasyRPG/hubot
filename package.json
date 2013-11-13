@@ -12,7 +12,8 @@
     "request": "*",
     "redis": "*",
     "feedparser": "*",
-    "hubot-irc": "*"
+    "hubot-irc": "*",
+    "coffee-script": "*"
   },
 
   "engines": {
