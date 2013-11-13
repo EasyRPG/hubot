@@ -1,1 +1,1 @@
-web: ./node_modules/hubot/bin/hubot -a irc
+web: ./node_modules/.bin/hubot -a irc

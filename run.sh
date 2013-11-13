@@ -18,4 +18,4 @@ export HUBOT_URL="http://${HUBOT_DOMAIN}/"
 
 export FEED_CHECK_INTERVAL=60
 
-./node_modules/hubot/bin/hubot -a irc
+./node_modules/.bin/hubot -a irc
