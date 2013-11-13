@@ -11,10 +11,10 @@ export HUBOT_LOG_LEVEL="debug"
 
 export HUBOT_IRC_ROOMS="#easyrpg"
 export HUBOT_IRC_SERVER="irc.freenode.net"
-export HUBOT_IRC_NICK="easyrpg-hubot
+export HUBOT_IRC_NICK="easyrpg-hubot"
 export HUBOT_IRC_DEBUG=On
 export HUBOT_IRC_UNFLOOD=100
-export HUBOT_URL='http://'${HUBOT_DOMAIN}
+export HUBOT_URL="http://${HUBOT_DOMAIN}/"
 
 export FEED_CHECK_INTERVAL=60
 
