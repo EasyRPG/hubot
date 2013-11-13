@@ -10,11 +10,7 @@
   },
 
   "dependencies": {
-    "underscore": "*",
-    "handlebars": "*",
     "hubot": "*",
-    "request": "*",
-    "redis": "*",
     "feedparser": "*",
     "hubot-irc": "*",
     "coffee-script": "*"
