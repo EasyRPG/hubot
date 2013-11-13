@@ -4,6 +4,10 @@
   "author": "take_cheeze",
   "description": "easyrpg bot",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/take-cheeze/irc_bot.git"
+  },
 
   "dependencies": {
     "underscore": "*",
