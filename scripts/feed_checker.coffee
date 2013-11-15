@@ -16,7 +16,7 @@
 # Author:
 #   Takeshi Watanabe
 
-feedparser = require 'feedparser'
+FeedParser = require 'feedparser'
 request = require 'request'
 
 module.exports = (robot) ->
@@ -41,7 +41,7 @@ module.exports = (robot) ->
         robot.logger.debug "checking feed: #{url}"
 
         next = []
-        request(url).pipe(new feedparser())
+        request(url).pipe(new FeedParser())
           .on 'error', (err) ->
             robot.logger.warning "feed parsing error in #{url}: #{err}"
           .on 'meta', (meta) ->
