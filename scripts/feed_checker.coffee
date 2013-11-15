@@ -36,7 +36,7 @@ module.exports = (robot) ->
       is_room = usr.room?
       continue if _.contains sent, (if is_room then usr.room else usr.id)
 
-      func = if is_room then robot.messageRoom else robot.send
+      func = (if is_room then robot.messageRoom else robot.send)
       func (if is_room then usr.room else usr), msg
       sent.push if is_room then usr.room else usr.id
 
