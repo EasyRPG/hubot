@@ -41,15 +41,17 @@ module.exports = (robot) ->
         robot.logger.debug "checking feed: #{url}"
 
         next = []
-        request(url).pipe(new FeedParser())
+        request.get(url).pipe(new FeedParser())
           .on 'error', (err) ->
             robot.logger.warning "feed parsing error in #{url}: #{err}"
-          .on 'meta', (meta) ->
-            next.push meta
+          # ignore meta
+          # .on 'meta', (meta) ->
+          .on 'readable', ->
+            next.push this.read()
           .on 'end', ->
             if prev.length != 0 then next.forEach (article) ->
               if is_new prev, article.guid
-                robot.send user, "new item #{article.title} #{article.link}"
+                robot.send user, "new article: #{article.title} #{article.link}"
                 if article.summary? then robot.send user, "summary: #{article.summary}"
 
             # save feed
