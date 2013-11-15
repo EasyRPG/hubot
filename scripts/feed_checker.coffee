@@ -47,7 +47,7 @@ module.exports = (robot) ->
           # ignore meta
           # .on 'meta', (meta) ->
           .on 'readable', ->
-            next.push this.read()
+            while item = this.read() then next.push item
           .on 'end', ->
             if prev.length != 0 then next.forEach (article) ->
               if is_new prev, article.guid
