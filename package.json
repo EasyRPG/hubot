@@ -16,7 +16,8 @@
     "hubot-irc": "*",
     "underscore": "*",
     "handlebars": "*",
-    "coffee-script": "*"
+    "coffee-script": "*",
+    "request": "*"
   },
 
   "engines": {
