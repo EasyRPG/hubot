@@ -4,6 +4,7 @@
 # Dependencies:
 #   'feedparser': '*'
 #   'request': '*'
+#   'underscore': '*'
 #
 # Configuration:
 #   FEED_CHECK_INTERVAL
@@ -18,6 +19,7 @@
 
 FeedParser = require 'feedparser'
 request = require 'request'
+_ = require 'underscore'
 
 module.exports = (robot) ->
   feed_check_interval = null
@@ -27,16 +29,26 @@ module.exports = (robot) ->
     articles.every (v) ->
       v.guid != guid
 
+  send_message = (feed_url, msg) ->
+    usrs = robot.brain.data.feed_check_user[feed_url]
+    sent = []
+    for usr in usrs
+      is_room = usr.room?
+      continue if _.contains sent, (if is_room then usr.room else usr.id)
+
+      func = if is_room then robot.messageRoom else robot.send
+      func (if is_room then usr.room else usr), msg
+      sent.push if is_room then usr.room else usr.id
+
   robot.brain.on 'loaded', ->
     interval = parseInt process.env.FEED_CHECK_INTERVAL
-    if isNaN interval then interval = 60 * 5
+    interval = 60 * 5 if isNaN interval
 
     robot.logger.debug "setting feed check interval to: #{interval}"
 
     robot.brain.data.feed_check ||= {}
+    robot.brain.data.feed_check_user ||= {}
     feed_check_interval = setInterval ->
-      user = {}
-
       for url, prev of robot.brain.data.feed_check
         robot.logger.debug "checking feed: #{url}"
 
@@ -48,11 +60,12 @@ module.exports = (robot) ->
           # .on 'meta', (meta) ->
           .on 'readable', ->
             while item = @read() then next.push item
+          # all article parsed
           .on 'end', ->
             if prev.length != 0 then next.forEach (article) ->
               if is_new prev, article.guid
-                robot.send user, "new article: #{article.title} #{article.link}"
-                if article.summary? then robot.send user, "summary: #{article.summary}"
+                send_message url, "new article: #{article.title} #{article.link}"
+                send_message url, "summary: #{article.summary}" if article.summary?
 
             # save feed
             robot.brain.data.feed_check[url] = next
@@ -60,20 +73,23 @@ module.exports = (robot) ->
 
   robot.respond /check_feed (h[^ ]+)/i, (msg) ->
     url = msg.match[1]
-    robot.brain.data.feed_check[url] = []
-    msg.reply 'Subscribing to ' + url
+    robot.brain.data.feed_check[url] ||= []
+    robot.brain.data.feed_check_user[url] ||= []
+    robot.brain.data.feed_check_user[url].push msg.message.user
+    msg.reply "Subscribing to #{url}"
 
   robot.respond /check_feed stop ([^ ]+)/i, (msg) ->
     url = msg.match[1]
     if robot.brain.data.feed_check[url]?
-      msg.reply 'Unsubscribing from ' + url
+      msg.reply "Unsubscribing from #{url}"
       delete robot.brain.data.feed_check[url]
+      delete robot.brain.data.feed_check_user[url]
     else
-      msg.reply url + ' isn`t subscribed'
+      msg.reply "#{url} isn`t subscribed"
 
   robot.respond /checking_feed/i, (msg) ->
     keys = Object.keys robot.brain.data.feed_check
     if keys.length == 0
       msg.reply 'No feed subscribed'
     else
-      msg.reply 'Subscribed: ' + keys.join(' , ')
+      msg.reply "Subscribed: #{keys.join(' , ')}"
