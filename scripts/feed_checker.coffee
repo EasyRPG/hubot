@@ -23,7 +23,9 @@ module.exports = (robot) ->
   feed_check_interval = null
 
   # article with same guid not found
-  is_new = (articles, guid) -> articles.every (v) -> v.guid != guid
+  is_new = (articles, guid) ->
+    articles.every (v) ->
+      v.guid != guid
 
   robot.brain.on 'loaded', ->
     interval = parseInt process.env.FEED_CHECK_INTERVAL
@@ -42,7 +44,8 @@ module.exports = (robot) ->
         request(url).pipe(new feedparser())
           .on 'error', (err) ->
             robot.logger.warning "feed parsing error in #{url}: #{err}"
-          .on 'meta', (meta) -> next.push meta
+          .on 'meta', (meta) ->
+            next.push meta
           .on 'end', ->
             if prev.length != 0 then next.forEach (article) ->
               if is_new prev, article.guid
