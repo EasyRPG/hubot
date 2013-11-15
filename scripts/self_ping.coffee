@@ -6,7 +6,10 @@
 #
 # Configuration:
 #   HUBOT_URL
-#   HUBOT_SELF_PING_INTERVAL(optional, in seconds, default interval is 10 minute)
+#   HUBOT_SELF_PING_INTERVAL
+#
+# Notes:
+#   HUBOT_SELF_PING_INTERVAL: optional, unit is seconds, default interval is 10 minute
 #
 # Author:
 #   Takeshi Watanabe
