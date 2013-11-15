@@ -3,6 +3,7 @@
 #
 # Dependencies:
 #   'feedparser': '*'
+#   'request': '*'
 #
 # Configuration:
 #   FEED_CHECK_INTERVAL
@@ -16,40 +17,41 @@
 #   Takeshi Watanabe
 
 feedparser = require 'feedparser'
+request = require 'request'
 
 module.exports = (robot) ->
   feed_check_interval = null
 
-  is_new = (articles, guid) ->
-    ret = true
-    articles.forEach (v) ->
-      if v.guid == guid
-        ret = false
-    ret
+  # article with same guid not found
+  is_new = (articles, guid) -> articles.every (v) -> v.guid != guid
 
   robot.brain.on 'loaded', ->
-    if process.env.FEED_CHECK_INTERVAL? and isNaN parseInt(process.env.FEED_CHECK_INTERVAL)
-      robot.logger.error 'Invalid feed check interval: ' + process.env.FEED_CHECK_INTERVAL
+    interval = parseInt process.env.FEED_CHECK_INTERVAL
+    if isNaN interval then interval = 60 * 5
+
+    robot.logger.debug "setting feed check interval to: #{interval}"
 
     robot.brain.data.feed_check ||= {}
     feed_check_interval = setInterval ->
       user = {}
 
       for url, prev of robot.brain.data.feed_check
-        try
-          feedparser.parseUrl url, (err, m, next) ->
-            if err
-              robot.logger.warning 'feed parsing error in (' + url + '): ' + err
+        robot.logger.debug "checking feed: #{url}"
 
-            if prev.length != 0
-              next.forEach (article) ->
-                if is_new prev, article.guid
-                  robot.send user, article.title + ' ' + article.link
+        next = []
+        request(url).pipe(new feedparser())
+          .on 'error', (err) ->
+            robot.logger.warning "feed parsing error in #{url}: #{err}"
+          .on 'meta', (meta) -> next.push meta
+          .on 'end', ->
+            if prev.length != 0 then next.forEach (article) ->
+              if is_new prev, article.guid
+                robot.send user, "new item #{article.title} #{article.link}"
+                if article.summary? then robot.send user, "summary: #{article.summary}"
 
+            # save feed
             robot.brain.data.feed_check[url] = next
-        catch err
-          robot.logger.warning 'feed parsing error in (' + url + '): ' + err
-    , 1000 * parseInt(process.env.FEED_CHECK_INTERVAL || (60 * 5).toString())
+    , 1000 * interval
 
   robot.respond /check_feed (h[^ ]+)/i, (msg) ->
     url = msg.match[1]
