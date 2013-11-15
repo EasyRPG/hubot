@@ -18,7 +18,7 @@ module.exports = (robot) ->
 
   robot.brain.on 'loaded', ->
     interval = parseInt(process.env.HUBOT_SELF_PING_INTERVAL)
-    interval = isNaN interval? 1000 * 60 * 10 : interval
+    if isNaN interval then interval = 1000 * 60 * 10
 
     robot.logger.debug "setting self ping interval to: #{interval}"
 
