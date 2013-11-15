@@ -13,7 +13,7 @@
 #   hubot checking_feed - list all the checking urls
 #
 # Author:
-#   take_cheeze
+#   Takeshi Watanabe
 
 feedparser = require 'feedparser'
 
