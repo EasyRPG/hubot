@@ -20,6 +20,8 @@ module.exports = (robot) ->
     interval = parseInt(process.env.HUBOT_SELF_PING_INTERVAL)
     interval = isNaN interval? 1000 * 60 * 10 : interval
 
+    robot.logger.debug "setting self ping interval to: #{interval}"
+
     ping_interval = setInterval ->
       request.get process.env.HUBOT_URL, (e, r, body) ->
         robot.logger.debug "sent ping to #{process.env.HUBOT_URL}"
