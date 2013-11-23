@@ -154,15 +154,15 @@ module.exports = (robot) ->
 
   render_items = (title, items) ->
 
-  render_links = (title, base, items) ->
-    render title, items.map (v) ->
+  render_links = (base, items) ->
+    render base, items.map (v) ->
       "<p><a href=\"#{process.env.HUBOT_URL}/#{base}/#{v}\">#{v}</a></p>"
 
   not_found = (res) ->
     res.type 'text/plain'
     res.send 404, 'not found'
 
-  send_links = (res, title, base, links) ->
+  send_links = (res, base, links) ->
     if links.length == 0 then not_found res
     else
       res.type 'text/html'
@@ -239,7 +239,7 @@ module.exports = (robot) ->
     year = parseInt req.params.year
     if chat_data()[room]?[year]?
       links.push "#{idx}" if v for idx,v in chat_data()[room][year]
-    send_links res, "#{year}", "/#{robot.name}/log/#{room}/#{year}", links
+    send_links res, "#{robot.name}/log/#{room}/#{year}", links
 
   robot.router.get "/#{robot.name}/log/:room/:year/:month", (req, res) ->
     links = []
@@ -247,7 +247,7 @@ module.exports = (robot) ->
     month = parseInt req.params.month
     if chat_data()[room]?[year]?[month]?
       links.push "#{idx}" if v for idx,v in chat_data()[room][year][month]
-    send_links res, "#{year}/#{month}", "#{robot.name}/log/#{room}/#{year}/#{month}", links
+    send_links res, "#{robot.name}/log/#{room}/#{year}/#{month}", links
 
   robot.router.get "/#{robot.name}/log/:room/:year/:month/:date", (req, res) ->
     room = req.params.room
