@@ -53,9 +53,10 @@ render = (title, lines) ->
       }
 
       p {
-        border-bottom: 1px solid
+        border-bottom: 1px solid;
+        border-bottom-color: #000000;
       }
-      p {
+      p:last-child {
         border: 0;
       }
     </style>
