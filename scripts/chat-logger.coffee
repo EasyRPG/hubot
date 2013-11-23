@@ -110,11 +110,11 @@ module.exports = (robot) ->
 
   # events
   log_message = (msg) ->
-    unless msg.room?
+    unless msg.envelope.room?
       robot.logger.debug "msg without room: #{msg}"
       return
 
-    room = msg.room
+    room = msg.envelope.room
     msg_data =
       nick: msg.user.name
       type: message_type msg
