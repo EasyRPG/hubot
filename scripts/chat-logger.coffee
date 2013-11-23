@@ -215,12 +215,13 @@ module.exports = (robot) ->
 
   robot.router.get "/#{robot.name}/log/:room", (req, res) ->
     room = req.param.room
-
-    # years
-    years = _.keys(chat_data()[room]).sort()
-    links = years
+    links = []
 
     if chat_data()[room]?
+      # years
+      years = _.keys(chat_data()[room]).sort()
+      links = years
+
       # months of last year
       last_year = _.last(years)
       for idx,v in chat_data()[room][last_year]
