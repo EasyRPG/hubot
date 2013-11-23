@@ -60,9 +60,6 @@ render = (title, lines) ->
         border-bottom: 1px solid;
         border-bottom-color: #000000;
       }
-      p:last-child {
-        border: 0;
-      }
     </style>
   </head>
 
