@@ -169,31 +169,38 @@ module.exports = (robot) ->
 
   list_feed_item = (room) ->
     src = chat_data()[room]
-    years = _.keys(src).sort().reverse()
-
     result = []
 
     try
-      for year in years
-        year.reduceRight (prev, month) ->
+      for year in _.keys(src).sort().reverse()
+        src[year].reduceRight (prev, month) ->
+          return unless month
           month.reduceRight (prev, day) ->
-            day.reduceRight (result, msg) ->
+            return unless day
+            day.reduceRight (prev, msg) ->
               if result.length == 0 or _.first(_.first result).date - msg.date >= FEED_DIVIDE_THRESHOLD
                 result.unshift [msg]
               else
                 _.last(result).unshift msg
 
               throw "break" if result.length > ITEM_COUNT
-            , result
+            , null
+          , null
+        , null
+    catch e
+      throw e if e != "break"
 
     result.slice(0, ITEM_COUNT).map (v) ->
       f = _.first(v)
       d = new Date f.date
 
       title: d.toUTCString()
+      author:
+        name: f.nick
       link: "#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth() + 1}/#{d.getUTCDate()}\##{generate_time_string d}"
       description:
-        v.map (v) -> render_item v
+        v.map (v) ->
+          render_item v
         .reduce (ret, v) ->
           ret + v
         , ''
@@ -203,8 +210,11 @@ module.exports = (robot) ->
     feed = new Feed
       title: 'hubot log'
       description: "log of room: #{req.params.room}"
+      author:
+        name: robot.name
+        link: base_url
       link: "#{base_url}/#{req.params.room}/feed"
-    if chat_data()[req.params.room]
+    if chat_data()[req.params.room]?
       list_feed_item(req.params.room).forEach (v) -> feed.item v
     res.type 'application/atom+xml'
     res.send feed.render 'atom-1.0'
