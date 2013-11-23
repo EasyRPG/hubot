@@ -87,11 +87,11 @@ module.exports = (robot) ->
     robot.brain.data.chat_logger ||= {}
 
   # commands
-  robot.respond /log\s+today$/, (msg) ->
+  robot.respond /log\s+today/, (msg) ->
     now = new Date()
     msg.reply date_url(msg.envelope.room, now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate())
 
-  robot.respond /log\s+yesterday$/, (msg) ->
+  robot.respond /log\s+yesterday/, (msg) ->
     yest = new Date(Date.yest() - 1000 * 60 * 60 * 24)
     msg.reply date_url(msg.envelope.room, yest.getUTCFullYear(), yest.getUTCMonth() + 1, yest.getUTCDate())
 
@@ -101,7 +101,7 @@ module.exports = (robot) ->
   robot.respond /log\s+search (.*)$/, (msg) ->
     msg.reply "#{base_url}/#{escape_room msg.envelope.room}/search?#{QS.stringify { q: msg.match[1]}}"
 
-  robot.respond /log\s+feed$/, (msg) ->
+  robot.respond /log\s+feed/, (msg) ->
     msg.reply "#{base_url}/#{escape_room msg.envelope.room}/feed"
 
   # events
