@@ -71,7 +71,7 @@ render = (title, lines) ->
 
 module.exports = (robot) ->
   escape_room = (room) ->
-    room.replace(/[^\w]/, '-', 'g').replace(/-+(.*)-+/, '$1')
+    room.replace(/[^\w]/, '-', 'g').replace(/^-*(.*)-*$/, '$1')
 
   chat_data = -> robot.brain.data.chat_logger
 
@@ -108,7 +108,7 @@ module.exports = (robot) ->
       robot.logger.debug "msg without room: #{msg}"
       return
 
-    room = msg.envelope.room
+    room = escape_room msg.envelope.room
     msg_data =
       nick: msg.envelope.user.name
       type: t
