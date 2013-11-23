@@ -75,8 +75,10 @@ module.exports = (robot) ->
 
   chat_data = -> robot.brain.data.chat_logger
 
+  base_url = "#{process.env.HUBOT_URL.replace /\/*$/, ''}/#{robot.name}/log"
+
   date_url = (room, year, month, date) ->
-    "#{process.env.HUBOT_URL}/#{robot.name}/log/#{escape_room room}/#{year}/#{month}/#{date}"
+    "#{base_url}/#{escape_room room}/#{year}/#{month}/#{date}"
 
   # brain
   robot.brain.on 'loaded', =>
@@ -95,10 +97,10 @@ module.exports = (robot) ->
     msg.reply date_url(msg.envelope.room, msg.match[1] || new Date().getUTCFullYear(), msg.match[2], msg.match[3])
 
   robot.respond /log\s+search (.*)$/, (msg) ->
-    msg.reply "#{process.env.HUBOT_URL}/#{robot.name}/log/#{escape_room msg.envelope.room}/search?#{QS.stringify { q: msg.match[1]}}"
+    msg.reply "#{base_url}/#{escape_room msg.envelope.room}/search?#{QS.stringify { q: msg.match[1]}}"
 
   robot.respond /log\s+search (.*)$/, (msg) ->
-    msg.reply "#{process.env.HUBOT_URL}/#{robot.name}/log/#{escape_room msg.envelope.room}/feed"
+    msg.reply "#{base_url}/#{escape_room msg.envelope.room}/feed"
 
   # events
   log_message = (t, msg) ->
@@ -120,7 +122,7 @@ module.exports = (robot) ->
     data = data[t.getUTCDate()] ||= []
     data.push msg_data
 
-    robot.logger.debug "adding #{room} #{t.toUTCString()}: #{msg_data}"
+    robot.logger.debug "adding #{room} #{t.toUTCString()}: #{JSON.stringify msg_data}"
 
   robot.enter (msg) -> log_message 'enter', msg
   robot.leave (msg) -> log_message 'leave', msg
@@ -149,7 +151,7 @@ module.exports = (robot) ->
 
   render_links = (base, items) ->
     render base, items.map (v) ->
-      "<p><a href=\"#{process.env.HUBOT_URL}/#{base}/#{v}\">#{v}</a></p>"
+      "<p><a href=\"#{base_url}/#{base}/#{v}\">#{v}</a></p>"
 
   not_found = (res) ->
     res.type 'text/plain'
@@ -185,7 +187,7 @@ module.exports = (robot) ->
       d = new Date f.date
 
       title: d.toUTCString()
-      link: "#{process.env.HUBOT_URL}/#{robot.name}/log/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth()}/#{d.getUTCDate()}\##{generate_time_string d}"
+      link: "#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth()}/#{d.getUTCDate()}\##{generate_time_string d}"
       description:
         v.map (v) -> render_item v
         .reduce (ret, v) ->
@@ -193,20 +195,22 @@ module.exports = (robot) ->
         , ''
       date: new Date f.date
 
-  robot.router.get "/#{robot.name}/log/:room/feed", (req, res) ->
+  base_path = "#{robot.name}/log"
+
+  robot.router.get "/#{base_path}/:room/feed", (req, res) ->
     feed = new Feed
       title: 'hubot log'
       description: "log of room: #{req.params.room}"
-      link: "#{process.env.HUBOT_URL}/#{robot.name}/log/#{req.params.room}/feed"
+      link: "#{base_url}/#{req.params.room}/feed"
     feed.item v for v in list_feed_item req.params.room if chat_data()[req.params.room]
     res.type 'application/atom+xml'
     res.send feed.render 'atom-1.0'
 
-  robot.router.get "/#{robot.name}/log/:room/search", (req, res) ->
+  robot.router.get "/#{base_path}/:room/search", (req, res) ->
     res.type 'text/html'
     res.send render_items search_items req.query.q
 
-  robot.router.get "/#{robot.name}/log/:room", (req, res) ->
+  robot.router.get "/#{base_path}/:room", (req, res) ->
     room = req.params.room
     links = []
 
@@ -225,26 +229,26 @@ module.exports = (robot) ->
       for idx,v in chat_data()[room][last_year][last_month]
         links.push "#{last_year}/#{last_month}/#{idx}" if v
 
-    send_links res, "#{robot.name}/log/#{room}", links
+    send_links res, "#{base_path}/#{room}", links
 
-  robot.router.get "/#{robot.name}/log/:room/:year", (req, res) ->
+  robot.router.get "/#{base_path}/:room/:year", (req, res) ->
     links = []
     room = req.params.room
     year = parseInt req.params.year
     if chat_data()[room]?[year]?
       links.push "#{idx}" if v for idx,v in chat_data()[room][year]
-    send_links res, "#{robot.name}/log/#{room}/#{year}", links
+    send_links res, "#{base_path}/#{room}/#{year}", links
 
-  robot.router.get "/#{robot.name}/log/:room/:year/:month", (req, res) ->
+  robot.router.get "/#{base_path}/:room/:year/:month", (req, res) ->
     links = []
     room = req.params.room
     year = parseInt req.params.year
     month = parseInt req.params.month
     if chat_data()[room]?[year]?[month]?
       links.push "#{idx}" if v for idx,v in chat_data()[room][year][month]
-    send_links res, "#{robot.name}/log/#{room}/#{year}/#{month}", links
+    send_links res, "#{base_path}/#{room}/#{year}/#{month}", links
 
-  robot.router.get "/#{robot.name}/log/:room/:year/:month/:date", (req, res) ->
+  robot.router.get "/#{base_path}/:room/:year/:month/:date", (req, res) ->
     room = req.params.room
     year = req.params.year
     month = parseInt req.params.month
