@@ -224,12 +224,12 @@ module.exports = (robot) ->
 
       # months of last year
       last_year = _.last(years)
-      for idx,v in chat_data()[room][last_year]
+      for idx,v of chat_data()[room][last_year]
         links.push "#{last_year}/#{idx}" if v
 
       # days of last month
       last_month = chat_data()[room][last_year].length - 1
-      for idx,v in chat_data()[room][last_year][last_month]
+      for idx,v of chat_data()[room][last_year][last_month]
         links.push "#{last_year}/#{last_month}/#{idx}" if v
 
     send_links res, "#{base_path}/#{room}", links
@@ -239,7 +239,7 @@ module.exports = (robot) ->
     room = req.params.room
     year = parseInt req.params.year
     if chat_data()[room]?[year]?
-      links.push "#{idx}" if v for idx,v in chat_data()[room][year]
+      links.push "#{idx}" if v for idx,v of chat_data()[room][year]
     send_links res, "#{base_path}/#{room}/#{year}", links
 
   robot.router.get "/#{base_path}/:room/:year/:month", (req, res) ->
@@ -248,7 +248,7 @@ module.exports = (robot) ->
     year = parseInt req.params.year
     month = parseInt(req.params.month) - 1
     if chat_data()[room]?[year]?[month]?
-      links.push "#{idx}" if v for idx,v in chat_data()[room][year][month]
+      links.push "#{idx}" if v for idx,v of chat_data()[room][year][month]
     send_links res, "#{base_path}/#{room}/#{year}/#{month}", links
 
   robot.router.get "/#{base_path}/:room/:year/:month/:date", (req, res) ->
