@@ -114,7 +114,7 @@ module.exports = (robot) ->
       nick: msg.envelope.user.name
       type: t
       date: Date.now()
-    msg_data['text'] = msg.text if msg.text?
+    msg_data['text'] = msg.message.text if msg.message.text?
 
     t = new Date msg_data.date
     data = chat_data()[room] ||= {}
