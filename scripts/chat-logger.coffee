@@ -203,9 +203,9 @@ module.exports = (robot) ->
   robot.router.get "/#{robot.name}/log/:room/feed", (req, res) ->
     feed = new Feed
       title: 'hubot log'
-      description: "log of room: #{req.param.room}"
-      link: "#{process.env.HUBOT_URL}/#{robot.name}/log/#{req.param.room}/feed"
-    feed.item v for v in list_feed_item req.param.room if chat_data()[req.param.room]
+      description: "log of room: #{req.params.room}"
+      link: "#{process.env.HUBOT_URL}/#{robot.name}/log/#{req.params.room}/feed"
+    feed.item v for v in list_feed_item req.params.room if chat_data()[req.params.room]
     res.type 'application/atom+xml'
     res.send feed.render 'atom-1.0'
 
@@ -214,7 +214,7 @@ module.exports = (robot) ->
     res.send render_items search_items req.query.q
 
   robot.router.get "/#{robot.name}/log/:room", (req, res) ->
-    room = req.param.room
+    room = req.params.room
     links = []
 
     if chat_data()[room]?
@@ -236,24 +236,24 @@ module.exports = (robot) ->
 
   robot.router.get "/#{robot.name}/log/:room/:year", (req, res) ->
     links = []
-    year = parseInt req.param.year
+    year = parseInt req.params.year
     if chat_data()[room]?[year]?
       links.push "#{idx}" if v for idx,v in chat_data()[room][year]
     send_links res, "#{year}", "/#{robot.name}/log/#{room}/#{year}", links
 
   robot.router.get "/#{robot.name}/log/:room/:year/:month", (req, res) ->
     links = []
-    year = parseInt req.param.year
-    month = parseInt req.param.month
+    year = parseInt req.params.year
+    month = parseInt req.params.month
     if chat_data()[room]?[year]?[month]?
       links.push "#{idx}" if v for idx,v in chat_data()[room][year][month]
     send_links res, "#{year}/#{month}", "#{robot.name}/log/#{room}/#{year}/#{month}", links
 
   robot.router.get "/#{robot.name}/log/:room/:year/:month/:date", (req, res) ->
-    room = req.param.room
-    year = req.param.year
-    month = parseInt req.param.month
-    date = parseInt req.param.date
+    room = req.params.room
+    year = req.params.year
+    month = parseInt req.params.month
+    date = parseInt req.params.date
     if chat_data()[room]?[year]?[month]?[date]?
       res.type 'text/html'
       res.send render_items "#{year}/#{month}/#{date}", chat_data()[room]?[year]?[month]?[date]?
