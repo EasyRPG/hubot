@@ -137,6 +137,7 @@ module.exports = (robot) ->
 
   # web interface
   search_items = (query) ->
+    [] # TODO
 
   generate_time_string = (d) ->
     d = new Date d if d instanceof Number
