@@ -135,7 +135,7 @@ module.exports = (robot) ->
     [] # TODO
 
   generate_time_string = (d) ->
-    d = new Date d if d instanceof Number
+    d = new Date d unless d instanceof Date
     sprintf '%02d:%02d.%04d', d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()
 
   render_item = (item) ->
