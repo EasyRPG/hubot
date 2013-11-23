@@ -257,5 +257,5 @@ module.exports = (robot) ->
     date = parseInt req.params.date
     if chat_data()[room]?[year]?[month]?[date]?
       res.type 'text/html'
-      res.send render_items "#{year}/#{month}/#{date}", chat_data()[room]?[year]?[month]?[date]?
+      res.send render_items "#{year}/#{month}/#{date}", chat_data()[room][year][month][date]
     else not_found res
