@@ -110,7 +110,7 @@ module.exports = (robot) ->
 
   # events
   log_message = (msg) ->
-    unless msg.room
+    unless msg.room?
       robot.logger.debug "msg without room: #{msg}"
       return
 
@@ -127,6 +127,8 @@ module.exports = (robot) ->
     data = data[t.getUTCMonth()] ||= []
     data = data[t.getUTCDate()] ||= []
     data.push msg_data
+
+    robot.logger.debug "adding #{room} #{t.toUTCString()}: #{msg_data}"
 
   robot.enter (msg) -> log_message msg
   robot.leave (msg) -> log_message msg
