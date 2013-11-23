@@ -148,6 +148,7 @@ module.exports = (robot) ->
     "<p id=\"#{time_str}\">#{time_str} #{item.name} #{linkify escape_html(msg), 'html'}</p>"
 
   render_items = (title, items) ->
+    render title, items.map(render_item)
 
   render_links = (base, items) ->
     render base, items.map (v) ->
