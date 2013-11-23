@@ -146,7 +146,7 @@ module.exports = (robot) ->
       when 'leave' then msg = "leaved the room"
       else msg = "unknown message type: #{item}"
     time_str = generate_time_string item.date
-    "<p id=\"#{time_str}\">#{time_str} #{item.name} #{linkify escape_html(msg), 'html'}</p>"
+    "<p id=\"#{time_str}\">#{time_str} #{item.nick} #{linkify escape_html(msg), 'html'}</p>"
 
   render_items = (title, items) ->
     render title, items.map(render_item)
