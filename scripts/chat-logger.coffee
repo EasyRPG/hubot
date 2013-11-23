@@ -204,7 +204,8 @@ module.exports = (robot) ->
       title: 'hubot log'
       description: "log of room: #{req.params.room}"
       link: "#{base_url}/#{req.params.room}/feed"
-    feed.item v for v in list_feed_item req.params.room if chat_data()[req.params.room]
+    if chat_data()[req.params.room]
+      list_feed_item(req.params.room).forEach (v) -> feed.item v
     res.type 'application/atom+xml'
     res.send feed.render 'atom-1.0'
 
