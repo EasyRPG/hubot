@@ -76,7 +76,8 @@ module.exports = (robot) ->
 
   chat_data = -> robot.brain.data.chat_logger
 
-  base_url = "#{process.env.HUBOT_URL.replace /\/*$/, ''}/#{robot.name}/log"
+  base_path = "#{robot.name}/log"
+  base_url = "#{process.env.HUBOT_URL.replace /\/*$/, ''}/#{base_path}"
 
   date_url = (room, year, month, date) ->
     "#{base_url}/#{escape_room room}/#{year}/#{month}/#{date}"
@@ -92,7 +93,7 @@ module.exports = (robot) ->
 
   robot.respond /log\s+yesterday$/, (msg) ->
     yest = new Date(Date.yest() - 1000 * 60 * 60 * 24)
-    msg.reply date_url(msg.envelope.room, yest.getUTCFullYear(), yest.getUTCMonth(), yest.getUTCDate())
+    msg.reply date_url(msg.envelope.room, yest.getUTCFullYear(), yest.getUTCMonth() + 1, yest.getUTCDate())
 
   robot.respond /log\s+([1-9]\d{3})?\/([1-9]\d{0,1})\/([1-9]\d{0,1})/, (msg) ->
     msg.reply date_url(msg.envelope.room, msg.match[1] || new Date().getUTCFullYear(), msg.match[2], msg.match[3])
@@ -119,7 +120,7 @@ module.exports = (robot) ->
     t = new Date msg_data.date
     data = chat_data()[room] ||= {}
     data = data[t.getUTCFullYear()] ||= []
-    data = data[t.getUTCMonth()] ||= []
+    data = data[t.getUTCMonth() + 1] ||= []
     data = data[t.getUTCDate()] ||= []
     data.push msg_data
 
@@ -136,7 +137,8 @@ module.exports = (robot) ->
 
   generate_time_string = (d) ->
     d = new Date d unless d instanceof Date
-    sprintf '%02d:%02d.%04d', d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()
+    sprintf '%02d:%02d:%02d.%04d', \
+      d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()
 
   render_item = (item) ->
     switch item.type
@@ -152,7 +154,7 @@ module.exports = (robot) ->
     render title, items.map(render_item)
 
   render_links = (base, items) ->
-    render base, items.map (v) ->
+    render "#{base_path}/#{base}", items.map (v) ->
       "<p><a href=\"#{base_url}/#{base}/#{v}\">#{v}</a></p>"
 
   not_found = (res) ->
@@ -189,15 +191,13 @@ module.exports = (robot) ->
       d = new Date f.date
 
       title: d.toUTCString()
-      link: "#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth()}/#{d.getUTCDate()}\##{generate_time_string d}"
+      link: "#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth() + 1}/#{d.getUTCDate()}\##{generate_time_string d}"
       description:
         v.map (v) -> render_item v
         .reduce (ret, v) ->
           ret + v
         , ''
       date: new Date f.date
-
-  base_path = "#{robot.name}/log"
 
   robot.router.get "/#{base_path}/:room/feed", (req, res) ->
     feed = new Feed
@@ -232,29 +232,29 @@ module.exports = (robot) ->
       for idx,v of chat_data()[room][last_year][last_month]
         links.push "#{last_year}/#{last_month}/#{idx}" if v
 
-    send_links res, "#{base_path}/#{room}", links
+    send_links res, "#{room}", links
 
   robot.router.get "/#{base_path}/:room/:year", (req, res) ->
     links = []
     room = req.params.room
     year = parseInt req.params.year
     if chat_data()[room]?[year]?
-      links.push "#{idx}" if v for idx,v of chat_data()[room][year]
-    send_links res, "#{base_path}/#{room}/#{year}", links
+      links.push "#{year}/#{idx}" if v for idx,v of chat_data()[room][year]
+    send_links res, "#{room}", links
 
   robot.router.get "/#{base_path}/:room/:year/:month", (req, res) ->
     links = []
     room = req.params.room
     year = parseInt req.params.year
-    month = parseInt(req.params.month) - 1
+    month = parseInt(req.params.month)
     if chat_data()[room]?[year]?[month]?
-      links.push "#{idx}" if v for idx,v of chat_data()[room][year][month]
-    send_links res, "#{base_path}/#{room}/#{year}/#{month}", links
+      links.push "#{year}/#{month}/#{idx}" if v for idx,v of chat_data()[room][year][month]
+    send_links res, "#{room}", links
 
   robot.router.get "/#{base_path}/:room/:year/:month/:date", (req, res) ->
     room = req.params.room
     year = req.params.year
-    month = parseInt(req.params.month) - 1
+    month = parseInt(req.params.month)
     date = parseInt req.params.date
     if chat_data()[room]?[year]?[month]?[date]?
       res.type 'text/html'
