@@ -132,8 +132,27 @@ module.exports = (robot) ->
   robot.hear /.*/, (msg) -> log_message 'text', msg
 
   # web interface
-  search_items = (query) ->
-    [] # TODO
+  search_items = (room, query) ->
+    src = chat_data()[room]
+    query = new RegExp query
+    result = []
+
+    try
+      for year in _.keys(src).sort().reverse()
+        src[year].reduceRight (prev, month) ->
+          return unless month
+          month.reduceRight (prev, day) ->
+            return unless day
+            day.reduceRight (prev, msg) ->
+              result.push msg if query.test JSON.stringify msg
+              throw "break" if result.length >= ITEM_COUNT
+            , null
+          , null
+        , null
+    catch e
+      throw e if e != "break"
+
+    result
 
   generate_time_string = (d) ->
     d = new Date d unless d instanceof Date
@@ -220,8 +239,12 @@ module.exports = (robot) ->
     res.send feed.render 'atom-1.0'
 
   robot.router.get "/#{base_path}/:room/search", (req, res) ->
-    res.type 'text/html'
-    res.send render_items search_items req.query.q
+    if chat_data()[req.params.room]?
+      res.type 'text/html'
+      res.send render_items \
+        "Search result of #{req.query.q}", \
+        search_items(req.params.room, req.query.q)
+    else not_found
 
   robot.router.get "/#{base_path}/:room", (req, res) ->
     room = req.params.room
