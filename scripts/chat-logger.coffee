@@ -88,7 +88,7 @@ module.exports = (robot) ->
 
   # brain
   robot.brain.on 'loaded', =>
-    robot.brain.data.logger ||= {}
+    robot.brain.data.chat_logger ||= {}
 
   # commands
   robot.respond /log\s+today$/, (msg) ->
