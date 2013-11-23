@@ -52,6 +52,10 @@ render = (title, lines) ->
         color: #000000;
       }
 
+      strong {
+        background: #ffff00;
+      }
+
       p {
         border-bottom: 1px solid;
         border-bottom-color: #000000;
@@ -134,7 +138,7 @@ module.exports = (robot) ->
   # web interface
   search_items = (room, query) ->
     src = chat_data()[room]
-    query = new RegExp query
+    query = new RegExp query, 'gi'
     result = []
 
     try
@@ -159,7 +163,7 @@ module.exports = (robot) ->
     sprintf '%02d:%02d:%02d.%04d', \
       d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()
 
-  render_item = (item) ->
+  render_item = (item, query) ->
     switch item.type
       when 'text' then msg = "> #{item.text}"
       when 'topic' then msg = "changed topic: #{item.text}"
@@ -167,10 +171,12 @@ module.exports = (robot) ->
       when 'leave' then msg = "leaved the room"
       else msg = "unknown message type: #{item}"
     time_str = generate_time_string item.date
-    "<p id=\"#{time_str}\">#{time_str} #{item.nick} #{linkify escape_html(msg), 'html'}</p>"
+    txt = escape_html msg
+    txt = txt.replace new RegExp("(#{query})", 'gi'), '<strong>$1</strong>' if query
+    "<p id=\"#{time_str}\">#{time_str} #{item.nick} #{linkify txt, 'html'}</p>"
 
-  render_items = (title, items) ->
-    render title, items.map(render_item)
+  render_items = (title, items, query) ->
+    render title, items.map (v) -> render_item v, query
 
   render_links = (base, items) ->
     render "#{base_path}/#{base}", items.map (v) ->
@@ -243,7 +249,7 @@ module.exports = (robot) ->
       res.type 'text/html'
       res.send render_items \
         "Search result of #{req.query.q}", \
-        search_items(req.params.room, req.query.q)
+        search_items(req.params.room, req.query.q), req.query.q
     else not_found
 
   robot.router.get "/#{base_path}/:room", (req, res) ->
