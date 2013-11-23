@@ -88,7 +88,7 @@ module.exports = (robot) ->
   # commands
   robot.respond /log\s+today$/, (msg) ->
     now = new Date()
-    msg.reply date_url(msg.envelope.room, now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    msg.reply date_url(msg.envelope.room, now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate())
 
   robot.respond /log\s+yesterday$/, (msg) ->
     yest = new Date(Date.yest() - 1000 * 60 * 60 * 24)
@@ -245,7 +245,7 @@ module.exports = (robot) ->
     links = []
     room = req.params.room
     year = parseInt req.params.year
-    month = parseInt req.params.month
+    month = parseInt(req.params.month) - 1
     if chat_data()[room]?[year]?[month]?
       links.push "#{idx}" if v for idx,v in chat_data()[room][year][month]
     send_links res, "#{base_path}/#{room}/#{year}/#{month}", links
@@ -253,7 +253,7 @@ module.exports = (robot) ->
   robot.router.get "/#{base_path}/:room/:year/:month/:date", (req, res) ->
     room = req.params.room
     year = req.params.year
-    month = parseInt req.params.month
+    month = parseInt(req.params.month) - 1
     date = parseInt req.params.date
     if chat_data()[room]?[year]?[month]?[date]?
       res.type 'text/html'
