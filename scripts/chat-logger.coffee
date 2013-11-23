@@ -101,7 +101,7 @@ module.exports = (robot) ->
   robot.respond /log\s+search (.*)$/, (msg) ->
     msg.reply "#{base_url}/#{escape_room msg.envelope.room}/search?#{QS.stringify { q: msg.match[1]}}"
 
-  robot.respond /log\s+search (.*)$/, (msg) ->
+  robot.respond /log\s+feed$/, (msg) ->
     msg.reply "#{base_url}/#{escape_room msg.envelope.room}/feed"
 
   # events
