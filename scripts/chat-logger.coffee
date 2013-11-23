@@ -73,14 +73,6 @@ module.exports = (robot) ->
   escape_room = (room) ->
     room.replace(/[^\w]/, '-', 'g').replace(/-+(.*)-+/, '$1')
 
-  message_type = (msg) ->
-    ret =
-      if msg instanceof LeaveMessage then 'leave'
-      else if msg instanceof EnterMessage then 'enter'
-      else if msg instanceof TopicMessage then 'topic'
-      else if msg instanceof TextMessage then 'text'
-      else 'other'
-
   chat_data = -> robot.brain.data.chat_logger
 
   date_url = (room, year, month, date) ->
@@ -109,7 +101,7 @@ module.exports = (robot) ->
     msg.reply "#{process.env.HUBOT_URL}/#{robot.name}/log/#{escape_room msg.envelope.room}/feed"
 
   # events
-  log_message = (msg) ->
+  log_message = (t, msg) ->
     unless msg.envelope.room?
       robot.logger.debug "msg without room: #{msg}"
       return
@@ -117,7 +109,7 @@ module.exports = (robot) ->
     room = msg.envelope.room
     msg_data =
       nick: msg.envelope.user.name
-      type: message_type msg
+      type: t
       date: Date.now()
     msg_data['text'] = msg.text if msg instanceof TextMessage
 
@@ -130,10 +122,10 @@ module.exports = (robot) ->
 
     robot.logger.debug "adding #{room} #{t.toUTCString()}: #{msg_data}"
 
-  robot.enter (msg) -> log_message msg
-  robot.leave (msg) -> log_message msg
-  robot.topic (msg) -> log_message msg
-  robot.hear /.*/, (msg) -> log_message msg
+  robot.enter (msg) -> log_message 'enter', msg
+  robot.leave (msg) -> log_message 'leave', msg
+  robot.topic (msg) -> log_message 'topic', msg
+  robot.hear /.*/, (msg) -> log_message 'text', msg
 
   # web interface
   search_items = (query) ->
@@ -149,7 +141,7 @@ module.exports = (robot) ->
       when 'topic' then msg = "changed topic: #{item.text}"
       when 'enter' then msg = "entered the room"
       when 'leave' then msg = "leaved the room"
-      when 'other' then msg = "unknown message type: #{item}"
+      else msg = "unknown message type: #{item}"
     time_str = generate_time_string item.date
     "<p id=\"#{time_str}\">#{time_str} #{item.name} #{linkify escape_html(msg), 'html'}</p>"
 
