@@ -116,7 +116,7 @@ module.exports = (robot) ->
 
     room = msg.envelope.room
     msg_data =
-      nick: msg.user.name
+      nick: msg.envelope.user.name
       type: message_type msg
       date: Date.now()
     msg_data['text'] = msg.text if msg instanceof TextMessage
