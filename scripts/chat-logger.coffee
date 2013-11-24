@@ -108,7 +108,7 @@ module.exports = (robot) ->
   # events
   log_message = (t, msg) ->
     unless msg.envelope.room?
-      robot.logger.debug "msg without room: #{msg}"
+      robot.logger.debug "msg without room: #{JSON.stringify msg}"
       return
 
     room = escape_room msg.envelope.room
