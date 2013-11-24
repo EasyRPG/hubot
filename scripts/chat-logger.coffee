@@ -93,7 +93,7 @@ module.exports = (robot) ->
     msg.reply date_url(msg.envelope.room, now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate())
 
   robot.respond /log\s+yesterday/, (msg) ->
-    yest = new Date(Date.yest() - 1000 * 60 * 60 * 24)
+    yest = new Date(Date.now() - 1000 * 60 * 60 * 24)
     msg.reply date_url(msg.envelope.room, yest.getUTCFullYear(), yest.getUTCMonth() + 1, yest.getUTCDate())
 
   robot.respond /log\s+([1-9]\d{3})?\/([1-9]\d{0,1})\/([1-9]\d{0,1})/, (msg) ->
