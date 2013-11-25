@@ -17,7 +17,11 @@
     "underscore": "*",
     "handlebars": "*",
     "coffee-script": "*",
-    "request": "*"
+    "request": "*",
+    "feed": "*",
+    "linkify": "*",
+    "escape-html": "*",
+    "sprintf": "*"
   },
 
   "engines": {
