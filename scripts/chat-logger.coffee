@@ -196,14 +196,12 @@ module.exports = (robot) ->
     try
       for year in _.keys(src).sort().reverse()
         src[year].reduceRight (prev, month) ->
-          return unless month
-          month.reduceRight (prev, day) ->
-            return unless day
-            day.reduceRight (prev, msg) ->
-              if result.length == 0 or _.first(_.first result).date - msg.date >= FEED_DIVIDE_THRESHOLD
-                result.unshift [msg]
+          month && month.reduceRight (prev, day) ->
+            day && day.reduceRight (prev, msg) ->
+              if result.length == 0 or _.last(_.last result).date - msg.date >= FEED_DIVIDE_THRESHOLD
+                result.push [msg]
               else
-                _.last(result).unshift msg
+                _.last(result).push msg
 
               throw "break" if result.length > ITEM_COUNT
             , null
@@ -212,21 +210,16 @@ module.exports = (robot) ->
     catch e
       throw e if e != "break"
 
-    result.slice(0, ITEM_COUNT).map (v) ->
-      f = _.first(v)
-      d = new Date f.date
+    result.slice(0, ITEM_COUNT).reverse().map (v) ->
+      title = _.last(v)
+      d = new Date title.date
 
       title: d.toUTCString()
       author:
-        name: f.nick
+        name: title.nick
       link: "#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth() + 1}/#{d.getUTCDate()}\##{generate_time_string d}"
-      description:
-        v.map (v) ->
-          render_item v
-        .reduce (ret, v) ->
-          ret + v
-        , ''
-      date: new Date f.date
+      description: v.reverse().map((v) -> render_item v).join "\n"
+      date: new Date title.date
 
   robot.router.get "/#{base_path}/:room/feed", (req, res) ->
     feed = new Feed
