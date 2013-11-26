@@ -275,7 +275,8 @@ module.exports = (robot) ->
     room = req.params.room
     year = parseInt req.params.year
     if chat_data()[room]?[year]?
-      links.push "#{year}/#{idx}" if v for idx,v of chat_data()[room][year]
+      for idx,v of chat_data()[room][year]
+        links.push "#{year}/#{idx}" if v
     send_links res, "#{room}", links
 
   robot.router.get "/#{base_path}/:room/:year/:month", (req, res) ->
@@ -284,7 +285,8 @@ module.exports = (robot) ->
     year = parseInt req.params.year
     month = parseInt(req.params.month)
     if chat_data()[room]?[year]?[month]?
-      links.push "#{year}/#{month}/#{idx}" if v for idx,v of chat_data()[room][year][month]
+      for idx,v of chat_data()[room][year][month]
+        links.push "#{year}/#{month}/#{idx}" if v
     send_links res, "#{room}", links
 
   robot.router.get "/#{base_path}/:room/:year/:month/:date", (req, res) ->
