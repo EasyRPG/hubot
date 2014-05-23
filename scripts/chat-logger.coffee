@@ -162,17 +162,17 @@ module.exports = (robot) ->
 
   render_item = (item, room, query) ->
     switch item.type
-      when 'text' then msg = "> #{item.text}"
-      when 'topic' then msg = "changed topic: #{item.text}"
-      when 'enter' then msg = "entered the room"
-      when 'leave' then msg = "leaved the room"
-      else msg = "unknown message type: #{item}"
+      when 'text' then msg = "> #{item.text}"; color = 'black'
+      when 'topic' then msg = "changed topic: #{item.text}"; color = 'gray'
+      when 'enter' then msg = "entered the room"; color = 'blue'
+      when 'leave' then msg = "leaved the room"; color = 'pink'
+      else msg = "unknown message type: #{item}"; color = 'yellow'
     d = new Date item.date
     time_str = generate_time_string d
     time_txt = "<a href=\"#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth() + 1}/#{d.getUTCDate()}\##{time_str}\">#{time_str}</a>"
     txt = escape_html msg
     txt = txt.replace new RegExp("(#{query})", 'gi'), '<strong>$1</strong>' if query
-    "<p id=\"#{time_str}\">#{time_txt} #{item.nick} #{linkify txt, 'html'}</p>"
+    "<p id=\"#{time_str}\" style=\"color:#{color}\">#{time_txt} <b>#{item.nick}</b> #{linkify txt, 'html'}</p>"
 
   render_items = (title, room, items, query) ->
     render title, items.map (v) -> render_item v, room, query
