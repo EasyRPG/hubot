@@ -212,19 +212,18 @@ module.exports = (robot) ->
     catch e
       throw e if e != "break"
 
-    result.slice(0, ITEM_COUNT).reverse().map (v) ->
-      title = _.last(v)
-      d = new Date title.date
+    result.slice(0, ITEM_COUNT).map (v) ->
+      d = new Date _.first(v).date
 
       title: d.toUTCString()
       author:
-        name: title.nick
+        name: _.first(v).nick
       link: "#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth() + 1}/#{d.getUTCDate()}\##{generate_time_string d}"
       description:
         v.map (msg) ->
           render_item msg, room
         .join "\n"
-      date: d
+      date: new Date _.last(v).date
 
   robot.router.get "/#{base_path}/:room/feed", (req, res) ->
     feed = new Feed
