@@ -164,8 +164,12 @@ module.exports = (robot) ->
     switch item.type
       when 'text' then msg = "> #{item.text}"; color = 'black'
       when 'topic' then msg = "changed topic: #{item.text}"; color = 'gray'
-      when 'enter' then msg = "entered the room"; color = 'blue'
-      when 'leave' then msg = "leaved the room"; color = 'pink'
+      when 'enter'
+        msg = "entered the room"; color = 'blue'
+        msg += ": #{item.text}" if item.text
+      when 'leave'
+        msg = "leaved the room"; color = 'pink'
+        msg += ": #{item.text}" if item.text
       else msg = "unknown message type: #{item}"; color = 'yellow'
     d = new Date item.date
     time_str = generate_time_string d
