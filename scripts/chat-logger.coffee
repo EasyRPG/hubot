@@ -235,7 +235,7 @@ module.exports = (robot) ->
         link: base_url
       link: "#{base_url}/#{req.params.room}/feed"
     if chat_data()[req.params.room]?
-      list_feed_item(req.params.room).forEach (v) -> feed.item v
+      list_feed_item(req.params.room).forEach (v) -> feed.addItem v
     res.type 'application/atom+xml'
     res.send feed.render 'atom-1.0'
 
