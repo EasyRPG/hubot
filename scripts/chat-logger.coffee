@@ -160,20 +160,22 @@ module.exports = (robot) ->
     sprintf '%02d:%02d:%02d.%04d', \
       d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()
 
-  render_item = (item, query) ->
+  render_item = (item, room, query) ->
     switch item.type
       when 'text' then msg = "> #{item.text}"
       when 'topic' then msg = "changed topic: #{item.text}"
       when 'enter' then msg = "entered the room"
       when 'leave' then msg = "leaved the room"
       else msg = "unknown message type: #{item}"
-    time_str = generate_time_string item.date
+    d = new Date item.date
+    time_str = generate_time_string d
+    time_txt = "<a href=\"#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth() + 1}/#{d.getUTCDate()}\##{time_str}\">#{time_str}</a>"
     txt = escape_html msg
     txt = txt.replace new RegExp("(#{query})", 'gi'), '<strong>$1</strong>' if query
-    "<p id=\"#{time_str}\">#{time_str} #{item.nick} #{linkify txt, 'html'}</p>"
+    "<p id=\"#{time_str}\">#{time_txt} #{item.nick} #{linkify txt, 'html'}</p>"
 
-  render_items = (title, items, query) ->
-    render title, items.map (v) -> render_item v, query
+  render_items = (title, room, items, query) ->
+    render title, items.map (v) -> render_item v, room, query
 
   render_links = (base, items) ->
     render "#{base_path}/#{base}", items.map (v) ->
@@ -238,7 +240,7 @@ module.exports = (robot) ->
     if chat_data()[req.params.room]?
       res.type 'text/html'
       res.send render_items \
-        "Search result of #{req.query.q}", \
+        "Search result of #{req.query.q}", req.params.room, \
         search_items(req.params.room, req.query.q), req.query.q
     else not_found
 
@@ -289,5 +291,5 @@ module.exports = (robot) ->
     date = parseInt req.params.date
     if chat_data()[room]?[year]?[month]?[date]?
       res.type 'text/html'
-      res.send render_items "#{year}/#{month}/#{date}", chat_data()[room][year][month][date]
+      res.send render_items "#{year}/#{month}/#{date}", room, chat_data()[room][year][month][date]
     else not_found res
