@@ -216,7 +216,7 @@ module.exports = (robot) ->
     catch e
       throw e if e != "break"
 
-    result.slice(0, ITEM_COUNT).map (v) ->
+    result.reverse().slice(0, ITEM_COUNT).map (v) ->
       d = new Date _.first(v).date
 
       title: d.toUTCString()
