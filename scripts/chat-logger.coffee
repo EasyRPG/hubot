@@ -203,7 +203,7 @@ module.exports = (robot) ->
               if result.length == 0 or _.last(_.last result).date - msg.date >= FEED_DIVIDE_THRESHOLD
                 result.push [msg]
               else
-                _.last(result).push msg
+                _.first(result).unshift msg
 
               throw "break" if result.length > ITEM_COUNT
             , null
