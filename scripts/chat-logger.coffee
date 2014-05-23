@@ -220,8 +220,11 @@ module.exports = (robot) ->
       author:
         name: title.nick
       link: "#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth() + 1}/#{d.getUTCDate()}\##{generate_time_string d}"
-      description: v.reverse().map((v) -> render_item v).join "\n"
-      date: new Date title.date
+      description:
+        v.map (msg) ->
+          render_item msg, room
+        .join "\n"
+      date: d
 
   robot.router.get "/#{base_path}/:room/feed", (req, res) ->
     feed = new Feed
