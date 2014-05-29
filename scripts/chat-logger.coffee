@@ -216,6 +216,18 @@ module.exports = (robot) ->
     catch e
       throw e if e != "break"
 
+    last_day = _.last(_.last(result)).date
+    new_logs = {}
+    for i in [0...10]
+      d = new Date(last_day - 1000 * 60 * 60 * 24 * i)
+      data = new_logs[d.getUTCFullYear()] ||= []
+      data = data[d.getUTCMonth() + 1] ||= []
+      data = data[d.getUTCDate()] ||= []
+      src_data = src[d.getUTCFullYear()][d.getUTCMonth() + 1][d.getUTCDate()]
+      if src_data
+        data.push msg for msg in src_data
+    chat_data()[room] = new_logs
+
     result.reverse().slice(0, ITEM_COUNT).map (v) ->
       d = new Date _.first(v).date
 
