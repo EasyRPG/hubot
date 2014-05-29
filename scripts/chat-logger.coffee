@@ -83,6 +83,9 @@ module.exports = (robot) ->
   date_url = (room, year, month, date) ->
     "#{base_url}/#{escape_room room}/#{year}/#{month}/#{date}"
 
+  robot.brain.on 'loaded', ->
+    robot.brain.resetSaveInterval 60 * 0.5
+
   # brain
   robot.brain.on 'loaded', =>
     robot.brain.data.chat_logger ||= {}
