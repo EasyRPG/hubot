@@ -210,7 +210,7 @@ module.exports = (robot) ->
               if result.length == 0 or _.last(_.last result).date - msg.date >= FEED_DIVIDE_THRESHOLD
                 result.push [msg]
               else
-                _.first(result).unshift msg
+                _.last(result).unshift msg
 
               throw "break" if result.length > ITEM_COUNT
             , null
@@ -231,7 +231,7 @@ module.exports = (robot) ->
         data.push msg for msg in src_data
     chat_data()[room] = new_logs
 
-    result.reverse().slice(0, ITEM_COUNT).map (v) ->
+    result.slice(0, ITEM_COUNT).map (v) ->
       d = new Date _.first(v).date
 
       title: d.toUTCString()
