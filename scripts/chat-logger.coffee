@@ -83,6 +83,9 @@ module.exports = (robot) ->
   date_url = (room, year, month, date) ->
     "#{base_url}/#{escape_room room}/#{year}/#{month}/#{date}"
 
+  robot.brain.on 'loaded', ->
+    robot.brain.resetSaveInterval 60 * 0.5
+
   # brain
   robot.brain.on 'loaded', =>
     robot.brain.data.chat_logger ||= {}
@@ -160,20 +163,26 @@ module.exports = (robot) ->
     sprintf '%02d:%02d:%02d.%04d', \
       d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()
 
-  render_item = (item, query) ->
+  render_item = (item, room, query) ->
     switch item.type
-      when 'text' then msg = "> #{item.text}"
-      when 'topic' then msg = "changed topic: #{item.text}"
-      when 'enter' then msg = "entered the room"
-      when 'leave' then msg = "leaved the room"
-      else msg = "unknown message type: #{item}"
-    time_str = generate_time_string item.date
+      when 'text' then msg = "> #{item.text}"; color = 'black'
+      when 'topic' then msg = "changed topic: #{item.text}"; color = 'gray'
+      when 'enter'
+        msg = "entered the room"; color = 'blue'
+        msg += ": #{item.text}" if item.text
+      when 'leave'
+        msg = "leaved the room"; color = 'pink'
+        msg += ": #{item.text}" if item.text
+      else msg = "unknown message type: #{item}"; color = 'yellow'
+    d = new Date item.date
+    time_str = generate_time_string d
+    time_txt = "<a href=\"#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth() + 1}/#{d.getUTCDate()}\##{time_str}\">#{time_str}</a>"
     txt = escape_html msg
     txt = txt.replace new RegExp("(#{query})", 'gi'), '<strong>$1</strong>' if query
-    "<p id=\"#{time_str}\">#{time_str} #{item.nick} #{linkify txt, 'html'}</p>"
+    "<p id=\"#{time_str}\" style=\"color:#{color}\">#{time_txt} <b>#{item.nick}</b> #{linkify txt, 'html'}</p>"
 
-  render_items = (title, items, query) ->
-    render title, items.map (v) -> render_item v, query
+  render_items = (title, room, items, query) ->
+    render title, items.map (v) -> render_item v, room, query
 
   render_links = (base, items) ->
     render "#{base_path}/#{base}", items.map (v) ->
@@ -201,7 +210,7 @@ module.exports = (robot) ->
               if result.length == 0 or _.last(_.last result).date - msg.date >= FEED_DIVIDE_THRESHOLD
                 result.push [msg]
               else
-                _.last(result).push msg
+                _.last(result).unshift msg
 
               throw "break" if result.length > ITEM_COUNT
             , null
@@ -210,16 +219,30 @@ module.exports = (robot) ->
     catch e
       throw e if e != "break"
 
-    result.slice(0, ITEM_COUNT).reverse().map (v) ->
-      title = _.last(v)
-      d = new Date title.date
+    last_day = _.first(_.last(result)).date
+    new_logs = {}
+    for i in [0...10]
+      d = new Date(last_day - 1000 * 60 * 60 * 24 * i)
+      data = new_logs[d.getUTCFullYear()] ||= []
+      data = data[d.getUTCMonth() + 1] ||= []
+      data = data[d.getUTCDate()] ||= []
+      src_data = src[d.getUTCFullYear()][d.getUTCMonth() + 1][d.getUTCDate()]
+      if src_data
+        data.push msg for msg in src_data
+    chat_data()[room] = new_logs
+
+    result.slice(0, ITEM_COUNT).map (v) ->
+      d = new Date _.first(v).date
 
       title: d.toUTCString()
       author:
-        name: title.nick
+        name: _.first(v).nick
       link: "#{base_url}/#{room}/#{d.getUTCFullYear()}/#{d.getUTCMonth() + 1}/#{d.getUTCDate()}\##{generate_time_string d}"
-      description: v.reverse().map((v) -> render_item v).join "\n"
-      date: new Date title.date
+      description:
+        v.map (msg) ->
+          render_item msg, room
+        .join "\n"
+      date: new Date _.last(v).date
 
   robot.router.get "/#{base_path}/:room/feed", (req, res) ->
     feed = new Feed
@@ -228,9 +251,10 @@ module.exports = (robot) ->
       author:
         name: robot.name
         link: base_url
-      link: "#{base_url}/#{req.params.room}/feed"
+      link: "#{base_url}/#{req.params.room}"
+      feed: "#{base_url}/#{req.params.room}/feed"
     if chat_data()[req.params.room]?
-      list_feed_item(req.params.room).forEach (v) -> feed.item v
+      list_feed_item(req.params.room).forEach (v) -> feed.addItem v
     res.type 'application/atom+xml'
     res.send feed.render 'atom-1.0'
 
@@ -238,7 +262,7 @@ module.exports = (robot) ->
     if chat_data()[req.params.room]?
       res.type 'text/html'
       res.send render_items \
-        "Search result of #{req.query.q}", \
+        "Search result of #{req.query.q}", req.params.room, \
         search_items(req.params.room, req.query.q), req.query.q
     else not_found
 
@@ -289,5 +313,5 @@ module.exports = (robot) ->
     date = parseInt req.params.date
     if chat_data()[room]?[year]?[month]?[date]?
       res.type 'text/html'
-      res.send render_items "#{year}/#{month}/#{date}", chat_data()[room][year][month][date]
+      res.send render_items "#{year}/#{month}/#{date}", room, chat_data()[room][year][month][date]
     else not_found res

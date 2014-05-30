@@ -11,4 +11,4 @@ export HUBOT_URL="http://localhost:$PORT"
 
 export FEED_CHECK_INTERVAL=60
 
-./node_modules/.bin/hubot
+./node_modules/.bin/hubot -r ./node_modules/hubot/src/scripts
