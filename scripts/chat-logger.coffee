@@ -219,7 +219,7 @@ module.exports = (robot) ->
     catch e
       throw e if e != "break"
 
-    last_day = _.last(_.last(result)).date
+    last_day = _.first(_.last(result)).date
     new_logs = {}
     for i in [0...10]
       d = new Date(last_day - 1000 * 60 * 60 * 24 * i)
