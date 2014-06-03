@@ -51,7 +51,7 @@ module.exports = (robot) ->
     robot.brain.data.feed_check ||= {}
     robot.brain.data.feed_check_user ||= {}
     feed_check_interval = setInterval ->
-      for url, prev of robot.brain.data.feed_check
+      _.each robot.brain.data.feed_check, (prev, url) ->
         robot.logger.debug "checking feed: #{url}"
 
         next = []
@@ -66,7 +66,7 @@ module.exports = (robot) ->
           .on 'end', ->
             if prev.length != 0 then next.forEach (article) ->
               if is_new prev, article.guid
-                send_message url, "new article: #{article.title} #{article.link}"
+                send_message url, "new article: #{article.title} #{article.link} (from #{url})"
                 send_message url, "summary: #{article.summary}" if article.summary?
 
             # save feed
