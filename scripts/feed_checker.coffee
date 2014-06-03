@@ -51,7 +51,7 @@ module.exports = (robot) ->
     robot.brain.data.feed_check ||= {}
     robot.brain.data.feed_check_user ||= {}
     feed_check_interval = setInterval ->
-      for url, prev of robot.brain.data.feed_check
+      _.each robot.brain.data.feed_check, (prev, url) ->
         robot.logger.debug "checking feed: #{url}"
 
         next = []
